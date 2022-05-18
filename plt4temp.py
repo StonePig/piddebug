@@ -127,7 +127,7 @@ def update_picture():
         lns1 = ax2.plot(sample_time, b_flow, '-', label = '流速')
         lns2 = ax.plot(sample_time, b_temp_out, '-r', label = '出水温度')
         lns3 = ax.plot(sample_time, b_temp_in, '-b', label = '进水温度')
-        lns4 = ax2.plot(sample_time, b_sum_error, '-y', label = '积分')
+        lns4 = ax2.plot(sample_time, b_sum_error, '-y', label = 'PID_OUT')
 
 
         # ax.yaxis.set_ticks([25,45,55,80,90,95,100])
@@ -158,12 +158,33 @@ def update_picture():
         # plt.plot(y1_min,b_temp[y1_min],'ko') 
         plt.plot(y1_max,b_temp_out[y1_max],'ko')
 
-        # pre = 0
-        # for i in range(len(b_ki) - 1):
-        #     if(b_ki[i + 1] == 1):
-        #         plt.plot(i + 1,b_temp_out[i + 1],'k^')
-        #         pre = i
-        #         show_max='['+str(b_ki[i + 1])+']'
+        running_state_prev = 0
+        debug_msg_prev = 0
+        for i in range(len(b_other) - 1):
+            debug_msg = int(b_other[i] / 256)
+            running_state = int((b_other[i] & 0xFF) / 16)
+            heat_num = b_other[i] & 0x0F
+
+            # 温度稳定条件
+            if(debug_msg == 3):
+                plt.plot(i + 1,b_temp_out[i],'k^')
+
+            # 固定pwm输出
+            if(debug_msg == 1 and running_state_prev == 0):
+                plt.plot(i + 1,b_temp_out[i],'r^')
+
+            # pid 启动
+            if(debug_msg == 2 and running_state_prev == 1):
+                plt.plot(i + 1,b_temp_out[i],'r^')
+
+            # 状态发生变化
+            if(running_state != running_state_prev):
+                plt.plot(i + 1,b_temp_out[i],'ko')
+
+            running_state_prev = running_state
+            debug_msg_prev = debug_msg
+            
+                # show_max='['+str(b_ki[i + 1])+']'
 
         show_max='['+str(b_temp_out[y1_max])+']'
         plt.annotate(show_max,xy=(y1_max,b_temp_out[y1_max]),xytext=(y1_max,b_temp_out[y1_max]))
