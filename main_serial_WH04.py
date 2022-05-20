@@ -108,7 +108,7 @@ class mainWin(serial_app_win.serialApp):
 		print("recv thread start")
 		file_name = "log/record_" + time.strftime("%Y%m%d%H%M%S", time.localtime()) + ".csv"
 		with open(file_name, 'w', encoding='utf-8') as fo:
-			fo.write('time,temp in,temp out,flow,sum,heat_num,state' + '\n')
+			fo.write('time,temp in,temp out,flow,pid,heat_num,run_state' + '\n')
 			while (self.port_opened):
 				time.sleep(0.01)
 				try:
@@ -129,11 +129,11 @@ class mainWin(serial_app_win.serialApp):
 									sum_error = data[i * rec_len + 7] + data[i * rec_len + 6] * 256
 									other = data[i * rec_len + 9] + data[i * rec_len + 8] * 256
 
-									if(temp_in > 40000):
+									if(temp_in > 30000):
 										temp_in = temp_in - 0x10000
-									if(temp_out > 40000):
+									if(temp_out > 30000):
 										temp_out = temp_out - 0x10000
-									if(sum_error > 40000):
+									if(sum_error > 30000):
 										sum_error = sum_error - 0x10000																				
 									# if(other > 40000):
 									# 	other = other - 0x10000

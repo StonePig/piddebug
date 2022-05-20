@@ -7,6 +7,19 @@ from pylab import *
 from matplotlib.widgets import Button
 from kneed import KneeLocator
 
+running_dict = {
+    '0':'init',
+    '1':'首出水',
+    '2':'常温',
+    '3':'强抽',
+    '4':'预热',
+    '5':'加热',
+    '6':'反向',
+    '7':'保护',
+}
+
+
+
 b_flow = [0] * 500
 b_temp_in = [0] * 500
 b_temp_out = [0] * 500
@@ -39,7 +52,7 @@ def update_data(temp_in, temp_out, flow, sum_error, other):
         b_temp_out.pop(0)
         b_temp_out.append(round(temp_out/100, 1))        
         b_sum_error.pop(0)
-        b_sum_error.append((sum_error + 20000) / 101 )
+        b_sum_error.append((sum_error + 30000) / 205 )
         b_other.pop(0)
         b_other.append(other)
         # b_kp.pop(0)
@@ -109,6 +122,7 @@ def update_picture():
     # mng.window.state("zoomed")
 
     counter = 0
+    heat_num = 0
 
     while(True):
         if not plt.fignum_exists(figID):
@@ -137,9 +151,9 @@ def update_picture():
         ax.set_ylim(0, 110)
 
 
-        ax2.set_xlabel("Time (ms), " + '{:d}'.format(counter))
+        ax2.set_xlabel("Time (ms), heat num:" + '{:d}'.format(heat_num) + ' time:' + '{:d}'.format(counter))
         ax2.set_ylabel(r"流速")
-        ax2.set_ylim(0,400)
+        ax2.set_ylim(0,300)
         # ax2.set_ylim(-3100,3100)
         ax2.grid(linestyle=":", axis="x")
 
@@ -167,19 +181,21 @@ def update_picture():
 
             # 温度稳定条件
             if(debug_msg == 3):
-                plt.plot(i + 1,b_temp_out[i],'k^')
+                plt.plot(i,b_temp_out[i],'k^')
 
             # 固定pwm输出
-            if(debug_msg == 1 and running_state_prev == 0):
-                plt.plot(i + 1,b_temp_out[i],'r^')
+            # if(debug_msg == 1 and debug_msg_prev == 0):
+            #     plt.plot(i,b_temp_out[i],'r^')
 
             # pid 启动
-            if(debug_msg == 2 and running_state_prev == 1):
-                plt.plot(i + 1,b_temp_out[i],'r^')
+            if(debug_msg == 2 and debug_msg_prev == 1):
+                plt.plot(i,b_temp_out[i],'r^')
 
             # 状态发生变化
             if(running_state != running_state_prev):
-                plt.plot(i + 1,b_temp_out[i],'ko')
+                plt.plot(i,b_temp_out[i],'k^')
+                show_text = '[' + running_dict[str(running_state)] + ']'
+                plt.annotate(show_text,xy=(i,b_temp_out[i]),xytext=(i,b_temp_out[i]))
 
             running_state_prev = running_state
             debug_msg_prev = debug_msg
