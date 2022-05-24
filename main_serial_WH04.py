@@ -8,7 +8,7 @@ from tkinter.filedialog import askdirectory
 import time
 from serial.tools import list_ports
 import serial
-
+import numpy as np
 import _thread
 import threading
 
@@ -339,27 +339,29 @@ class mainWin(serial_app_win.serialApp):
 
 		else:
 			win32api.MessageBox(0, "串口未打开", "提醒",win32con.MB_ICONWARNING)
-			import numpy as np
-			# 读取文件，文件绝对地址"D:\Project\arpatest01\foo.arpa"
-			dat = np.fromfile("C:\\Users\\yaozhong\\Desktop\\ee2.bin", dtype=np.uint8)
-			print(dat.shape)# 打印二进制文件形状
-			# 打印前一百个字符
-			num = dat[0]
-			step = num / 10
-			for i in range(1, 10):
-				# print(dat[i]*256+dat[i+1])
-				start = int(step * i)
-				diff = int((step * i - start) * 10)
-				value_start = dat[start*2] * 256 + dat[start*2+1]
-				value_end = dat[start*2 + 2] * 256 + dat[start*2+3]
-				mod1 =  round(diff * (value_start - value_end) / 10)
-				value = value_start - mod1
-				print(value)
 
 
+b_ave = [0] * 1000000
 
 if __name__ == '__main__':
 	# 下面是使用wxPython的固定用法
+	# 读取文件，文件绝对地址"D:\Project\arpatest01\foo.arpa"
+	dat = np.fromfile("E:\\bat.bin", dtype=np.uint8)
+	print(dat.shape)# 打印二进制文件形状
+	file_size = dat.size
+	num = file_size
+	record_num = file_size//4
+	step = int(num / 10) // 4 * 4
+	ave = dat[0]*256+dat[1]
+	for i in range(record_num):
+		ave = (ave*19 + dat[i*4] * 256 + dat[i*4+1])//20
+		b_ave[i*4] = ave // 256
+		b_ave[i*4+1] = ave % 256
+
+	for i in range(11):
+		bat_value = b_ave[i*step] * 256 + b_ave[i*step+1]
+		print(bat_value)
+
 	app = wx.App()
 	main_win = mainWin(None)
 	main_win.Show()
