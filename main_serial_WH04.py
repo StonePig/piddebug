@@ -123,11 +123,11 @@ class mainWin(serial_app_win.serialApp):
 							rec_len = 10
 							if(data_len % rec_len ==0):
 								for i in range(0, data_len // rec_len):
-									temp_in = data[i * rec_len + 1] + data[i * rec_len + 0] * 256
-									temp_out = data[i * rec_len + 3] + data[i * rec_len + 2] * 256
-									flow = data[i * rec_len + 5] + data[i * rec_len + 4] * 256
-									sum_error = data[i * rec_len + 7] + data[i * rec_len + 6] * 256
-									other = data[i * rec_len + 9] + data[i * rec_len + 8] * 256
+									temp_in = data[i * rec_len + 1] * 256 + data[i * rec_len + 0]
+									temp_out = data[i * rec_len + 3] * 256 + data[i * rec_len + 2]
+									flow = data[i * rec_len + 5] * 256 + data[i * rec_len + 4]
+									sum_error = data[i * rec_len + 7] * 256 + data[i * rec_len + 6]
+									other = data[i * rec_len + 9] * 256 + data[i * rec_len + 8]
 
 									if(temp_in > 30000):
 										temp_in = temp_in - 0x10000
@@ -346,21 +346,21 @@ b_ave = [0] * 1000000
 if __name__ == '__main__':
 	# 下面是使用wxPython的固定用法
 	# 读取文件，文件绝对地址"D:\Project\arpatest01\foo.arpa"
-	dat = np.fromfile("E:\\bat.bin", dtype=np.uint8)
-	print(dat.shape)# 打印二进制文件形状
-	file_size = dat.size
-	num = file_size
-	record_num = file_size//4
-	step = int(num / 10) // 4 * 4
-	ave = dat[0]*256+dat[1]
-	for i in range(record_num):
-		ave = (ave*19 + dat[i*4] * 256 + dat[i*4+1])//20
-		b_ave[i*4] = ave // 256
-		b_ave[i*4+1] = ave % 256
+	# dat = np.fromfile("E:\\bat.bin", dtype=np.uint8)
+	# print(dat.shape)# 打印二进制文件形状
+	# file_size = dat.size
+	# num = file_size
+	# record_num = file_size//4
+	# step = int(num / 10) // 4 * 4
+	# ave = dat[0]*256+dat[1]
+	# for i in range(record_num):
+	# 	ave = (ave*19 + dat[i*4] * 256 + dat[i*4+1])//20
+	# 	b_ave[i*4] = ave // 256
+	# 	b_ave[i*4+1] = ave % 256
 
-	for i in range(11):
-		bat_value = b_ave[i*step] * 256 + b_ave[i*step+1]
-		print(bat_value)
+	# for i in range(11):
+	# 	bat_value = b_ave[i*step] * 256 + b_ave[i*step+1]
+	# 	print(bat_value)
 
 	app = wx.App()
 	main_win = mainWin(None)
